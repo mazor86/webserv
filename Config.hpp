@@ -82,11 +82,10 @@ void *cmds(void* object)
 {
 	Config* obj = (Config*)object;
 	std::string cmd;
-	(void)obj; ////использ. перем.
-	// std::cout << CYAN<<"webserv: " << obj->get <<RESET<<std::endl;
+	(void)obj;
+
 	while(1)
 	{
-		// std::cout << CYAN<<"webserv: please enter your command (exit)" <<RESET<<std::endl;
 		std::cin >> cmd;
 		if (cmd == "exit")
 		{

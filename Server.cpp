@@ -68,7 +68,6 @@ int Server::_pollLoop()
 		if (ret == -1)
 		{
 			std::cout << YELLOW_B << " ! " << YELLOW << "error on call \'poll\': " << WHITE << strerror(errno) << std::endl;
-			// printf("Error on call 'poll': %s", strerror(errno));
 			return -1;
 		}
 		else if ( ret == 0 )
@@ -130,12 +129,7 @@ int Server::request(Connection &conn, int i)
 	else if (ret > 0)
 	{
 		std::cout << WHITE_B << ret << WHITE << " bytes received from client " << WHITE_B << i << RESET << std::endl;
-		std::cout << GREEN << buf << RESET << std::endl;
-
-
-		std::ofstream fileTmp("www/file.tmp", std::ios::app);
-		fileTmp << buf << '\n' << "----------" <<  '\n';
-
+		// std::cout << GREEN << buf << RESET << std::endl; /* раскоментировать для вывода буфера */
 
 		conn.bufHandler((char*)buf, ret);
 		if (conn.get_isOk())
@@ -152,8 +146,6 @@ int Server::responseSend(Connection &conn)
 	std::string response = conn.getResponse();
 //	std::cout << RED << response << RESET << std::endl;
 	sended = send(conn.getSockFd(), response.c_str(), response.length(), 0);
-//	std::cout << BLUE << response.length() << RESET << std::endl;
-//	std::cout << GREEN << sended << RESET << std::endl;
 	if (sended < 0)
 		throw Exceptions();
 	if (sended < (int)response.length())

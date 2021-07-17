@@ -20,7 +20,6 @@
 #include "Connection.hpp"
 #include "Response.hpp"
 
-// #define BACKLOG 10
 
 class Config;
 class Socket;
@@ -52,7 +51,6 @@ private:
 
 
 
-	// int i; //итератор (количество клиентов)
 public:
 	Server();
 	Server(const Server &copy);
@@ -61,12 +59,8 @@ public:
 	Server &operator=(const Server &copy);
 	int startServer(struct s_config *config);
 
-//	int request(struct pollfd *pfd_array, int &clients_count, int &i, struct s_config &config);
 	int request(Connection &conn, int i);
-	//&
-//	int response(struct pollfd *pfd_array, int &i, RequestParser &HTTPrequest, struct s_config &config);
 
-//	int responseSend(std::string response, struct pollfd *pfd_array, int &i);
 	int	responseSend(Connection &conn);
 
 

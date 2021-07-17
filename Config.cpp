@@ -74,16 +74,11 @@ void Config::load(std::string path)
 		_isValid = false;
 		return ;
 	}
-	// else
-	// {
-	// 	std::cout << "Config file found!\n";
-	// }
 
 	/* записываем строки разбитые по пробелу в вектор data */
 	while(!file.eof()) 
 	{
         file >> buffer;
-		// std::cout << configBuffer << "\n";
          data.push_back(buffer);
     }
 
@@ -97,9 +92,6 @@ void Config::load(std::string path)
 void Config::read(std::vector<std::string> &data)
 {
 	/* вывод data (не распарсенные данные из конфига) */
-	// for (int i =0; i<data.size(); i++)	
-	// {
-	// std::cout << data[i] << "\n";}
 
 	{	/* подсчет серверов в конфиге */
 		for(std::vector<std::string>::iterator it = data.begin(); it != data.end(); it++) 
@@ -126,8 +118,6 @@ void Config::read(std::vector<std::string> &data)
 			if (*it == "}")
 				closeBrace += 1;
 		}
-		// std::cout << openBrace << "\n";
-		// std::cout << closeBrace << "\n";
 		if (openBrace != closeBrace) //если скобок не одинаковое количество, то возвращаем ошибку
 		{
 			std::cout << YELLOW << "config error: wrong number of brackets\n" << RESET;
@@ -140,14 +130,11 @@ void Config::read(std::vector<std::string> &data)
 	std::cout << BLUE << "\nMap of configuration file:\n" << RESET;
  
 	/* старт парсинга */
-	for(int i = 0; i < _numOfServers; i++) //i <= _numOfServers; как вариант, перед циклом ищем количество "server" в файле
+	for(int i = 0; i < _numOfServers; i++)
 	{
-		
-
 		if (data[0] == "server") 
 		{
 			std::cout << std::setw(12) << BLUE_B << data[0] << "\n" << RESET;
-			// _numOfServers +=1;
 			t_config new_config;
 			new_config.serverID = i;
 			std::vector<std::string>::iterator it = data.begin();
@@ -167,11 +154,8 @@ void Config::read(std::vector<std::string> &data)
 					for (int c = 1; data[j+c].find("/cgi_bin") != std::string::npos && c < 3; c++)
 					{
 						new_config.cgi_alias.push_back(data[j + c]);
-						// std::cout << data[j+c];
 					}	
 				}
-
-				// new_config.server_name = (data[j] == "server_name") ? data[j+1] : std::string();
 				if (data[j] == "location")//////////////
 				{
 					std::cout << std::setw(15) << BLUE << "location\n" << RESET;
@@ -189,24 +173,15 @@ void Config::read(std::vector<std::string> &data)
 							for (int m = 1; data[l+m] == "GET" || data[l + m] == "POST" || data[l + m] == "DELETE" || data[l + m] == "PUT"; m++)
 							{
 								new_location.methods.push_back(data[l + m]);
-								// std::cout << data[l+m];
 							}	
 						}
 						if (data[l] == "root")
 							new_location.root = data[l + 1];
-						// if (data[l] == "cgi_alias")
-						// {
-						// 	for (int c = 1; data[l+c].find("/cgi_bin") != std::string::npos && c < 3; c++)
-						// 	{
-						// 		new_location.cgi_alias.push_back(data[l + c]);
-						// 		std::cout << data[l+c];
-						// 	}	
-						// }
 						if (data[l] == "}")
 							break ;
 					}
 					new_config.location.push_back(new_location);
-				}/////////////////////////////////////////
+				}
 				if (data[j] == "server")
 				{	
 					it++;
@@ -253,14 +228,8 @@ void Config::showConfig()
 			for(unsigned long m = 0; m < _configs[k].location[l].methods.size(); m++)
 				std::cout << _configs[k].location[l].methods[m] << " ";
 			std::cout << "\n";
-			// std::cout << std::setw(12)<< BLUE  << "methods: " << RESET << _configs[k].location[l].methods  << "\n";
 			std::cout << std::setw(15)<< BLUE  << "root: " << RESET << _configs[k].location[l].root  << "\n";
-			// std::cout << std::setw(10)<< BLUE  << "cgi_alias: " << RESET;
-			// for(unsigned long c = 0; c < _configs[k].location[l].cgi_alias.size(); c++)
-			// 	std::cout << _configs[k].location[l].cgi_alias[c] << " ";
-			// std::cout << "\n";
 		}
-		// std::cout << PURPLE  << "==================\n" << RESET;
 		enter("press ENTER to continue");
 		std::cout << "\n";
 	}
@@ -289,8 +258,6 @@ void Config::createServers()
 	threads = new pthread_t[_numOfServers];
 	std::cout << std::endl << CYAN_B << "Start servers..." << std::endl << CYAN <<"(enter \"exit\" for get out)" << RESET << std::endl << std::endl;
 	sleep(1);
-	// pthread_create(&threads[0], NULL, &cmd, &_numOfServers);
-
 	for(int i = 0; i < _numOfServers; i++)
     {
 		pthread_create(&threads[i], NULL, initServer<struct s_config, Server>, &_configs[i]);
@@ -301,5 +268,4 @@ void Config::createServers()
 	{
 		pthread_join(threads[i++], NULL);
 	}
-	// delete [] threads;
 }

@@ -1,8 +1,117 @@
+
+<!DOCTYPE html>
 <html>
 <head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>WebServ1.0/contact</title>
 	<link rel="stylesheet" href="www/site.com/style.css" type="text/css">
 	<link rel="shortcut icon" href="www/site.com/favicon.ico" type="image/x-icon">
+
+
+
+
+	<style>
+
+		#zatemnenie:target {
+		
+		display: block;
+		
+		}
+		
+		#zatemnenie {
+		
+		background: rgba(102, 102, 102, 0.68);
+		
+		width: 100%;
+		
+		height: 100%;
+		
+		position: fixed;
+		
+		top: 0;
+		
+		left: 0;
+		
+		display: none;
+		
+		z-index: 9999999999;
+		
+		}
+		
+		window {
+		
+		position: absolute;
+		
+		top: 50%;
+		
+		left: 50%;
+		
+		width: 400px;
+		
+		border: 1px solid #cecece;
+		
+		padding: 50px;
+		
+		transform: translate(-50%,-50%);
+		
+		background-color: #fafafa;
+		
+		}
+		
+		div#main_text a.close_window {
+		
+		position: absolute;
+		
+		right: 10px;
+		
+		top: 4px;
+		
+		border: none;
+		
+		}
+		
+
+
+
+
+		.modal-window {
+        display: none;
+        position: absolute;
+        z-index: 100;
+        background: #eee;
+        padding: 5px;
+        border-radius: 5px;
+        box-shadow: 2px 2px 5px #000000;
+
+        left: 30%;
+        top: 30px;
+    }
+    .modal-window-close {
+        position: absolute;
+        font-size: 10px;
+        cursor: pointer;
+        right: 4px;
+        top: 4px;
+    }
+    .modal-window-title {
+        text-align: center;
+    }
+    .modal-window-content {
+        padding: 5px;
+    }
+		</style>
+
+<script type="text/javascript">
+    function showModal(self) {
+        var modal = document.getElementById('modalWindow');
+        var iframe = modal.getElementsByTagName('iframe')[0];
+        iframe.src = self.href;
+        modal.style.display = 'block';
+        return false;
+    }
+</script>
 </head>
 <body>
 	<h1>WebServ 1.0</h1>
@@ -15,27 +124,56 @@
 		<li class="loaded"><a href="#">CONTACT</a></li>
 	</ul>
 
-	<!-- <iframe name="iframe1" style="position: absolute; left: -9999px;"></iframe> -->
-	<!-- <form action="/cgi_bin/form.cgi" method="post" name="contact_form" target="iframe1"><br> -->
-	<form action="/cgi_bin/form.cgi" method="post" name="contact_form" target="iframe1"><br>
-		<input type="hidden" name="location" value="contact.html">
-		<input name = "name" type="text" size="25" value="your name"><br>
-		<input name="phone" type="tel" size="25" value="your phone"><br>
-		<textarea name="message" id="msg" cols="30" rows="10">dsd</textarea>
-		<input name="submit" type="submit" vlaue="Send request">
-	</form>
+
+	<!-- Модальное окно -->
+	<!-- <a href="#zatemnenie">Самое простое модальное окно</a>
+	<div id="zatemnenie">
+	   <window>
+		   <a href="#close_window" class="close_window">X</a>
+		   Здесь текст, видео, ссылки, все, что вы захотите!
+	   </window>
+	</div> -->
+	<div id="modalWindow" class="modal-window">
+		<div class="modal-window-close" onclick="this.parentNode.style.display='none';">CLOSE</div>
+		<div class="modal-window-title">Message is send</div>
+		<div class="modal-window-content">
+			<iframe src="about:blank" frameborder="0"></iframe>
+		</div>
+	</div>
+
+
+
+	<div class="formbox">		
+
+		<!-- <div name="iframePostDiv"></div><iframe name="iframePost">h</iframe></div> -->
+		<iframe name="iframePost" style="position: absolute; left: -9999px;"></iframe>
+		<form class="form" action="/cgi_bin/db.py" method="post" name="contact_form" target="iframePost"><br>
+		<!-- <form action="/cgi_bin/form.cgi" method="post" name="contact_form" target="iframe1"><br> -->
+			<input type="hidden" name="location" value="contact.html">
+			<input name = "name" type="text" size="25" placeholder="Your name"><br>
+			<input name="phone" type="tel" size="25" placeholder="Your phone"><br>
+			<textarea name="message" id="msg" cols="30" rows="10" placeholder="Message"></textarea>
+			<input name="submit" type="submit" value="Send request" onclick="alert('message send')">
+			<!-- onclick="alert('message send')" -->
+			<!-- onclick="return showModal(this);" -->
+			<!-- <button onclick="location.hash ='zatemnenie'">button</button> -->
+		</form>
+		<p class="text">
+			Ждем ваших предложений! 
+		</p>
+	</div>
 	<br><br>
+	
 
 	
-	<form enctype="multipart/form-data" action="/cgi_bin/getfile.cgi" method="post">
+	<!-- <form enctype="multipart/form-data" action="/cgi_bin/getfile.cgi" method="post">
 		<input type="hidden" name="location" value="contact.html">
 		<p><input type="file" name="f" >
 		<input type="submit" value="Send"></p>
-	</form> 
+	</form>  -->
 
 	<!-- <a href="./../../../favicon.ico" download="textttV.txt" target="_blank">qqq</a> -->
 	<!-- <a href="./../../../favicon.ico" download="textttV.ico" target="_blank">qqq</a> -->
-
 
 
 

@@ -3,62 +3,41 @@
 #include "Cgi.hpp"
 
 
-// Cgi::Cgi() {}
-
-// Cgi::~Cgi()
-// {         
-// 	for (int i = 0; _varsArray[i]; ++i)
-//         free(_varsArray[i]);
-// }
-
-// Cgi &Cgi::operator=(const Cgi &copy)
-// {
-// 	return *this;
-// }
-
-// Cgi::Cgi(const Cgi &cgi) { *this = cgi; }
-
-Cgi::Cgi(std::string body, struct s_config *config, std::string pathToCgi, std::map<std::string, std::string> requestHeaders, std::string requestMethod) 
-: _body(body), _config(config), _pathToCgi(pathToCgi)
+Cgi::Cgi(std::string body, struct s_config *config, std::string pathToScript, 
+std::map<std::string, std::string> requestHeaders, std::string requestMethod, std::string &date) 
+:  _config(config), _body(body), _pathToScript(pathToScript), _date(date)
 {
-	std::cout << CYAN << "!CGI is working" << RESET << "\n";
+	_varsArray = NULL;
 	_varsArray = getVarsArray(setVariables(requestHeaders, requestMethod));
 }
 
 
 std::vector<std::string> Cgi::setVariables(std::map<std::string, std::string> requestHeaders, std::string requestMethod)
 {
-	// std::vector<std::string> env;
-    // _vars.push_back("AUTH_TYPE=" + locations.auth_data.AuthType);
     _vars.push_back("CONTENT_LENGTH=" + toString(_body.size()));
 	if (requestHeaders.find("Content-Type") != requestHeaders.end())
     	_vars.push_back("CONTENT_TYPE=" + requestHeaders.find("Content-Type")->second);
 	else
 		_vars.push_back("CONTENT_TYPE=");
     _vars.push_back("GATEWAY_INTERFACE=CGI/1.1");
-    // _vars.push_back(getPathInfo("PATH_INFO=" + );
-    // _vars.push_back("PATH_TRANSLATED=" + );
-	// if (.find("query_string") != )
-   	// 	_vars.push_back("QUERY_STRING=" + .find("query_string")->second);
-	// else
-    //     _vars.push_back("QUERY_STRING=");
+	if (requestHeaders.count("query_string"))
+   		_vars.push_back("QUERY_STRING=" + requestHeaders.find("query_string")->second);
+	else
+        _vars.push_back("QUERY_STRING=");
     _vars.push_back("REMOTE_ADDR=" + _config->server_name);
-    // _vars.push_back("REMOTE_IDENT=" + );
-    // _vars.push_back("REMOTE_USER=" + );
 	if (requestMethod.size() > 1)
     	_vars.push_back("REQUEST_METHOD=" + requestMethod);
 	else
         _vars.push_back("REQUEST_METHOD=");
-    // _vars.push_back("RЕQUEST_URI=" + );
-    _vars.push_back("SERVER_NAME=" + _config->server_name);
     _vars.push_back("SERVER_PORT=" + _config->listen);
     _vars.push_back("SERVER_PROTOCOL=HTTP/1.1");
     _vars.push_back("SERVER_SOFTWARE=web_server");
-	
-	for (int i = 0; i < _vars.size(); i++)
-		std::cout << _vars[i] << std::endl;
+	_vars.push_back("DATE_LOCAL=" + _date);
+	_vars.push_back("SERVER_NAME=" + toString( _config->serverID));
 	return _vars;
 }
+
+
 
 char **Cgi::getVarsArray(std::vector<std::string> vars) 
 {
@@ -76,104 +55,158 @@ char **Cgi::getVarsArray(std::vector<std::string> vars)
 
 
 
-void Cgi::launchCGI()
+/*
+** считывает созданный скриптом db.py файл db_[ID сервера].tmp
+** и формирует на основе его дынных html-страницу db_[ID сервера].html
+*/
+void Cgi::addToDataBase()
 {
-	//Формируем в глобальных переменных тело запроса и его длинну
-	static const std::string strRequestBody = _body.c_str();
+	std::string nameOfTMP = "./db/db_" + toString(_config->serverID) + ".tmp";
+	std::string nameOfHTML = "./db/db_" + toString(_config->serverID) + ".html";
 
-	static const std::string strRequestHeader = "Content-Length=" + std::to_string((long long)strRequestBody.length());
-	//Формируем переменные окружения которые будут отосланы дочернему процессу
-	static const char *variables[4] = {strRequestHeader.c_str(), "VARIABLE2=erererer", "VARIABLE3=3", 0};
-
-	//Формируем переменные командной строки для дочернего процесса. Первая переменная - путь к дочернему процессу.
-	// static const char *pszChildProcessArgs[4] = {"./cgi_bin/mkcgi", "first argument", "second argument", 0};
-	// static const char *pszChildProcessArgs[3] = {"/usr/bin/perl", "./cgi_bin/perl1.cgi", 0};
-	static const char *pszChildProcessArgs[3] = {"/usr/bin/python", "./cgi_bin/python1.py", 0};
-
-	//При желании можно запустить интерпретатор какого-нибудь скрипта. 
-	//Тогда первый аргумент - путь к интерпретатору, второй - к скрипту
-	//static const char *pszChildProcessArgs[3] = {"python", "./test.py", 0};
-
-	int fdStdInPipe[2], fdStdOutPipe[2];
-	
-	fdStdInPipe[0] = fdStdInPipe[1] = fdStdOutPipe[0] = fdStdOutPipe[1] = -1;
-	if (pipe(fdStdInPipe) != 0 || pipe(fdStdOutPipe) != 0)
+	std::ifstream db(nameOfTMP.c_str(), std::ios::in);
+	std::string line;
+	std::string dataBaseBuffer;
+	while(getline(db, line))
 	{
-		std::cout << "Cannot create CGI pipe";
-		// return 0;
+		dataBaseBuffer += line;
+		dataBaseBuffer += "\n";
 	}
+	std::ofstream html(nameOfHTML.c_str(), std::ios::out | std::ios::trunc);
+	html << "<!DOCTYPE html>\n<html>\n<head>\n<title>webserv - DataBase</title>\n";
+	html << "</head>\n<body>\n";
+	html << dataBaseBuffer;
+	html << "\n</body>\n</html>";
 
-	// Duplicate stdin and stdout file descriptors
-	int fdOldStdIn = dup(fileno(stdin));
-	int fdOldStdOut = dup(fileno(stdout));
-
-	// Duplicate end of pipe to stdout and stdin file descriptors
-	if ((dup2(fdStdOutPipe[1], fileno(stdout)) == -1) || (dup2(fdStdInPipe[0], fileno(stdin)) == -1))
-		std::cout << "Cannot create CGI pipe2";
-
-	// Close original end of pipe
-	close(fdStdInPipe[0]);
-	close(fdStdOutPipe[1]);
-
-	//Запускаем дочерний процесс, отдаем ему переменные командной строки и окружения
-	// const int nChildProcessID = spawn_process(pszChildProcessArgs, variables);
-
-
-    /* Create copy of current process */
-    // const int pID = spawn_process(pszChildProcessArgs, variables);
-    pid_t pID = fork();
-    
-    /* The parent`s new pid will be 0 */
-    if(pID == 0)
-    {
-		/* We are now in a child progress 
-		Execute different process */
-		execve(pszChildProcessArgs[0], (char* const*)pszChildProcessArgs, (char* const*)_varsArray);
-		/* This code will never be executed */
-		exit(EXIT_SUCCESS);
-
-	} else if (pID < 0)
-        write(2, "Error Fork", 10);
-
-    /* We are still in the original process */
-
-	// Duplicate copy of original stdin an stdout back into stdout
-	dup2(fdOldStdIn, fileno(stdin));
-	dup2(fdOldStdOut, fileno(stdout));
-
-	// Close duplicate copy of original stdin and stdout
-	close(fdOldStdIn);
-	close(fdOldStdOut);
-
-	//Отдаем тело запроса дочернему процессу
-	write(fdStdInPipe[1], strRequestBody.c_str(), strRequestBody.length());
-
-	while (1)
-	{
-		//Читаем ответ от дочернего процесса
-		char bufferOut[100000];
-		int n = read(fdStdOutPipe[0], bufferOut, 100000);
-		if (n > 0)
-		{
-			//Выводим ответ на экран
-			fwrite(bufferOut, 1, n, stdout);
-			fflush(stdout);
-		}
-
-		//Если дочерний процесс завершился, то завершаем и родительский процесс
-
-		int status;
-		if (waitpid(pID, &status, 0) > 0)
-			std::cout << "OKKK";
-
-	}
-
-
-
+	db.close();  
 }
 
 
 
+
+
+bool Cgi::launchCGI()
+{
+/* (1, basic)
+** версия пути к скрипту с изпользованием обоих параметров из alias (/cgi_bin/ == /usr/bin/[name]/webserv/cgi_bin/)
+** первый параметр может быть отличным от "cgi_bin"
+** в атрибуте формы "action" прописывать путь к скрипту /cgi_bin/script.cgi 
+*/
+	_pathToScript.erase(0, _config->cgi_alias[0].size());
+	_fullPathToScript = _config->cgi_alias[1] + _pathToScript;
+
+/* (2)
+** 	релативная версия ссылки к скрипту без использования alias из конфиг-файла;
+**  в атрибуте формы "action" прописывать только имя скрипта без /cgi_bin/ 
+**	this->_fullPathToScript = "./cgi_bin" + this->_pathToScript;
+*/
+
+/* (3)
+** версия пути к скрипту с изпользованием только второго параметра из alias (/usr/bin/[name]/webserv/cgi_bin/) 
+** в атрибуте формы "action" прописывать только имя скрипта без /cgi_bin/
+** this->_fullPathToScript = _config->cgi_alias[1]  + this->_pathToScript; 
+*/
+
+	/* проверяем существует ли такой файл */
+	std::string relativePathToScript = "./cgi_bin" + this->_pathToScript;
+	if (stat(relativePathToScript.c_str(), &_stat) != 0)
+	{
+		std::cout << RED << "webserv: " << RESET << "please, check existence if script" << std::endl;
+		return false;
+	}
+
+
+	/* проверяем расширение файла */
+	int extentionOfSctipt = EXTENTION_WITH_INTERPRETER;
+	if (_pathToScript.rfind(".py") != std::string::npos)
+		this->_pathToHandler = "/usr/bin/python";
+	else if (_pathToScript.rfind(".php") != std::string::npos)
+		this->_pathToHandler = "/usr/bin/php";
+	else if (_pathToScript.rfind(".perl") != std::string::npos || _pathToScript.rfind(".pl") != std::string::npos)
+		this->_pathToHandler = "/usr/bin/perl";
+	else if (_pathToScript.rfind(".cgi") != std::string::npos || _pathToScript.rfind(".exe") != std::string::npos)
+		extentionOfSctipt = EXTENTION_WITHOUT_INTERPRETER;
+	else if (_pathToScript.rfind(".py") == std::string::npos && _pathToScript.rfind(".php") == std::string::npos && 
+	_pathToScript.rfind(".perl") == std::string::npos && _pathToScript.rfind(".pl") == std::string::npos && 
+	_pathToScript.rfind(".cgi") == std::string::npos && _pathToScript.rfind(".exe") == std::string::npos)
+	{
+		std::cout << RED << "webserv: " << RESET << "extention of the script is false" << std::endl;
+		return false;
+	}
+
+	/* массив с данными для передачи в execve, для скриптов с интерпретатором и без соответственно */
+	const char *arguments_cgi[4] = {_fullPathToScript.c_str(), 0, 0, 0}; 				//если скрипту не требуется интерпретатор (C++)
+	const char *arguments[3] = {_pathToHandler.c_str(), _fullPathToScript.c_str(), 0}; 	//если скрипт с интепретатором 	(python, perl)
+
+	pid_t		pid;
+	std::string	newBody;
+
+	FILE	*fIn = tmpfile();
+	FILE	*fOut = tmpfile();
+	long	fdIn = fileno(fIn);
+	long	fdOut = fileno(fOut);
+	int		ret = 1;
+
+	write(fdIn, _body.c_str(), _body.size());
+	lseek(fdIn, 0, SEEK_SET);
+
+	pid = fork();
+
+	if (pid == -1)
+	{
+		throw Exceptions();
+		return false;
+	}
+	else if (!pid)
+	{
+
+		dup2(fdIn, STDIN_FILENO);
+		dup2(fdOut, STDOUT_FILENO);
+
+		if (extentionOfSctipt == EXTENTION_WITHOUT_INTERPRETER)
+			execve(arguments_cgi[0], (char* const*)arguments_cgi, (char* const*)_varsArray);
+		else if (extentionOfSctipt == EXTENTION_WITH_INTERPRETER)
+			execve(arguments[0], (char* const*)arguments, (char* const*)_varsArray);
+
+		std::cerr << RED << "Execve crashed" << RESET << std::endl;
+		exit(EXIT_SUCCESS);
+	}
+	else
+	{
+		char	buffer[6024] = {0};
+
+		waitpid(-1, NULL, 0);
+		lseek(fdOut, 0, SEEK_SET);
+
+		ret = 1;
+		while (ret > 0)
+		{
+			memset(buffer, 0, 6024);
+			ret = read(fdOut, buffer, 6024 - 1);
+			newBody += buffer;
+		}
+	}
+
+
+
+	/* 
+	** вывод возвращаемого скриптом значения
+	** std::cout << newBody << std::endl;
+	*/
+
+	/* если использовался скрипт для обработки формы "db.py", то
+	считаваем созданный скриптом временный файл и формируем html-страницу */
+	if (_fullPathToScript.rfind("db.py") != std::string::npos)
+		addToDataBase();
+
+
+	fclose(fIn);
+	fclose(fOut);
+	close(fdIn);
+	close(fdOut);
+	
+	return true;
+}
 
 
 

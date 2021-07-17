@@ -2,53 +2,61 @@
 #ifndef CGI
 # define CGI
 # include "main.hpp"
-#include "structure.h"
-#include "Response.hpp"
-#include "main.hpp"
+# include "structure.h"
+# include "Response.hpp"
+# include <errno.h>
+# include <signal.h>
+# include <sys/wait.h>
+# include <fcntl.h>
 
 
-#include <errno.h>
-#include <unistd.h>
-#include <signal.h>
-#include <sys/wait.h>
-// #include <process.h> /* Required for _spawnv */
-// #include <io.h>
-#include <fcntl.h>
-#include <string>
-#include <vector>
+# define EXTENTION_WITH_INTERPRETER 1
+# define EXTENTION_WITHOUT_INTERPRETER 0
 
 
+/*
+** для корректной работы cgi-модуля, все скрипты должны находиться в каталоге cgi_bin;
+** в конфигурационном файле в cgi alias, указывать пути не ставя слеш в конце;
+** в случае использования базового варианта доступа к скрипту (1), в атрибуте "href" тега <form>, 
+** требуется указывать имя скрипта и релативный путь к нему: "/cgi_bin/script";
+** в случае использования (2) и (3) вариантов доступа, в атрибуте "href" тега <form>, 
+** требуется указывать имя скрипта без пути к нему;
+** если скрипт написан на таких языках как python, php или perl, то расширение файла 
+** должно быть ".py", ".php", ".perl" или ".pl" соответственно; 
+** если скрипт написан на компилируемых языках, таких языках как С/С++,  то расширение файла  
+** должно быть ".cgi" или ".exe"
+**
+*/
 
 
 
 class Cgi
 {
 	private:
-		// std::map<std::string, std::string> variables;
-		std::vector<std::string> _vars;
-		char **_varsArray;
-		// std::string _vars;
+		std::vector<std::string> _vars; 				//переменные оркужения (string)
+		char **_varsArray;								//переменные оркужения (char)
 
 
-		// std::map<std::string, std::string> _requestHeaders;
-		// std::string 			_requestMethod;
-		struct s_config			*_config;
-		std::string 			_body;
-		std::string 			_pathToCgi;
-
+		struct s_config			*_config;				//конфиг
+		std::string 			_body;					//боди при запросе POST
+		std::string 			_pathToScript;			//путь к скрипту из html-формы
+		std::string 			_fullPathToScript;		//полный путь к скрипту из корня сервера
+		std::string             _pathToHandler;			//путь к обработчику скрипта
+		std::string 			_date;					//дата и время инициализации скрипта
 
 		
+		struct stat _stat; 								/* получение данных о файле */
+
 
 	public:
-		// Cgi();
-		Cgi(std::string body, struct s_config *config, std::string pathToCgi, std::map<std::string, std::string> requestHeaders, std::string requestMethod);
+		Cgi(std::string body, struct s_config *config, std::string pathToScript, 
+		std::map<std::string, std::string> requestHeaders, std::string requestMethod, std::string &date);
 		Cgi(const Cgi &cgi);
-		// ~Cgi();n
-		// Cgi &operator=(const Cgi &copy);
 
 		std::vector<std::string>  setVariables(std::map<std::string, std::string> requestHeaders, std::string requestMethod);
 		char **getVarsArray(std::vector<std::string> vars);
-		void launchCGI();
+		bool launchCGI();
+		void addToDataBase();
 
 };
 
@@ -67,5 +75,4 @@ class Cgi
 // http://www.cyberguru.ru/web/web-programming/cgi-tutor.html?start=14
 // http://www.xserver.ru/computer/langprogr/cgi/7/
 
-// std::map<std::string, std::string> mime_types{ {1, 2}, {3, 4}, {6, 5}, {8, 9}, {6, 8}, {3, 4}, {6, 7} };
 

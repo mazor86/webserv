@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>WebServ1.0/contact</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			font-family: Verdana, Geneva, Tahoma, sans-serif;
+		}
+		body { 
+			background-color: rgb(0, 0, 0);
+			color: rgb(223, 223, 223);
+		} 
+		h1 { 
+			font-size:2cm; text-align: center; margin-top: 70px; color: black; text-shadow: 0 0 2mm green 
+		}
+		h2 {
+			margin-left: 22px;
+		}
+		.menu {
+			background-color: rgb(26, 83, 19);
+			display: flex;
+			width: 100%;
+
+		}
+		.menu li {
+			border: 1px solid rgb(16, 134, 42);
+			list-style-type: none;
+			border-radius: 10%;
+			margin-left: 22px;
+		}
+		.menu li a 
+		{
+			border-radius: 10%;
+			display: block;
+			width: 100%;
+			font-size: 23px;
+			text-decoration: none;
+			color: rgb(190, 190, 190);
+		}
+		.menu li a:hover 
+		{
+			background-color: #1d9b3c;
+		}
+		.loaded {
+			background-color: #fffff3;
+		}
+		.formbox {
+			border: 1px solid gray;
+			margin: 2%;
+			display: flex;
+		}
+		.form {
+			
+			/* border: 1px solid gray; */
+			width: 50%;
+			margin-bottom: 25px;
+		}
+		.form input {
+	
+			margin-top: 20px;
+			width: 80%;
+			height: 35px;
+		}
+		.form textarea {
+			margin-top: 20px;
+			width: 80%;
+		}
+		.text {
+			width: 50%;
+			padding: 20px 25px;
+		}
+	</style>
+</head>
+<body>
+	<h1>Hacker.com</h1>
+	<h2>HOME</h2>
+	<ul class="menu">
+		<li><a href="/">HOME</a></li>
+		<!-- <li><a href="/about">ABOUT</a></li>
+		<li><a href="/gallery">GALLERY</a></li>
+		<li class="loaded"><a href="#">CONTACT</a></li> -->
+	</ul>
+	<!-- <div class="text">
+
+	</div> -->
+	
+
+	<iframe name="iframePost" style="position: absolute; left: -9999px;"></iframe>
+	<div class="formbox">		
+		<p class="text">
+			Хакинг – это выявление уязвимостей системы для получения доступа к её слабым местам. Хотя сейчас слово «хакер» ассоциируется с киберпреступниками, идея этичного хакинга появилась намного раньше. В 1960-х годах студенты Массачусетского Технологического Института термином hacking обозначали поиск способов оптимизации систем и машин для их эффективной работы. Но в 1980-х и 1990-х годах хакерами стали называть и преступников в сфере информационной безопасности.
+
+С ростом популярности персональных компьютеров многие важные данные стали храниться на цифровых носителях. Преступники увидели возможность кражи информации, которую можно было бы продать или использовать для мошенничества. Эти цифровые злоумышленники использовали свои навыки для получения доступа к частным компьютерам, кражи данных и даже шантажа. Такого рода хакеров сегодня называют Black Hat Hackers («черные шляпы», «черные хакеры»).
+
+В результате поиска компаниями адекватной защиты получил распространение этичный взлом – тестирование безопасности компьютерных систем. В отличие от черных шляп этичный хакер (White Hat Hacker) действует по предварительной договоренности и документирует процесс взлома.
+		</p>
+		<form class="form" action="/cgi_bin/db.py" method="post" name="contact_form" target="iframePost"><br>
+		<!-- <form action="/cgi_bin/form.cgi" method="post" name="contact_form" target="iframe1"><br> -->
+			<input type="hidden" name="location" value="contact.html">
+			<input name = "name" type="text" size="25" placeholder="Your name"><br>
+			<input name="phone" type="tel" size="25" placeholder="Your phone"><br>
+			<textarea name="message" id="msg" cols="30" rows="10" placeholder="Message"></textarea>
+			<input name="submit" type="submit" value="Use our services!!!" onclick="alert('message send')">
+			<!-- onclick="alert('message send')" -->
+			<!-- onclick="return showModal(this);" -->
+			<!-- <button onclick="location.hash ='zatemnenie'">button</button> -->
+		</form>
+	</div>
+	<br><br>
+</body>
+</html>
